@@ -21,6 +21,7 @@ interface SearchConfig {
   maxResults: number;
   defaultResults: number;
   defaultSafeSearch: 'strict' | 'moderate' | 'off';
+  defaultFreshness: string;
 }
 
 interface Config {
@@ -48,6 +49,7 @@ const config: Config = {
     maxResults: 10,
     defaultResults: 5,
     defaultSafeSearch: 'strict' as const,
+    defaultFreshness: 'pw',
   },
   brave: {
     apiKey: process.env.BRAVE_API_KEY || '',

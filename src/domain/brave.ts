@@ -213,12 +213,17 @@ function extractBraveResults(
  */
 async function fetchBraveSearchResults(
   query: string,
-  count: number
+  count: number,
+  safeSearch: 'strict' | 'moderate' | 'off' = config.search.defaultSafeSearch,
+  freshness: string | undefined
 ): Promise<SearchResult[]> {
   const url = new URL(config.brave.baseUrl);
   url.searchParams.set('q', query);
   url.searchParams.set('count', count.toString());
-  url.searchParams.set('safesearch', 'strict');
+  url.searchParams.set('safesearch', safeSearch);
+  if (freshness) {
+    url.searchParams.set('freshness', freshness);
+  }
 
   const response = await fetch(url.toString(), {
     headers: {
@@ -256,10 +261,11 @@ async function fetchBraveSearchResults(
 export async function performWebSearch(
   query: string,
   count: number = config.search.defaultResults,
-  safeSearch: 'strict' | 'moderate' | 'off' = config.search.defaultSafeSearch
+  safeSearch: 'strict' | 'moderate' | 'off' = config.search.defaultSafeSearch,
+  freshness: string | undefined
 ): Promise<string> {
   logger.debug(
-    `Performing search - Query: "${query}", Count: ${count}, SafeSearch: ${safeSearch}`
+    `Performing search - Query: "${query}", Count: ${count}, SafeSearch: ${safeSearch}, Freshness: ${freshness}`
   );
 
   try {
@@ -269,7 +275,12 @@ export async function performWebSearch(
     const sanitizedQuery = sanitizeQuery(query);
 
     // Fetch results from Brave Search API
-    const results = await fetchBraveSearchResults(sanitizedQuery, count);
+    const results = await fetchBraveSearchResults(
+      sanitizedQuery,
+      count,
+      safeSearch,
+      freshness
+    );
 
     if (results.length === 0) {
       logger.info(`No results found for query: "${query}"`);

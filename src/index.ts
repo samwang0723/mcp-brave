@@ -44,11 +44,17 @@ class McpServerApp {
           .default(config.search.defaultSafeSearch)
           .optional()
           .describe('SafeSearch level'),
+        freshness: z
+          .string()
+          .optional()
+          .describe(
+            'Freshness of results (pd, pw, pm, py, YYYY-MM-DDtoYYYY-MM-DD)'
+          ),
       },
-      async ({ query, count, safeSearch }) => {
+      async ({ query, count, safeSearch, freshness }) => {
         try {
           // Validate arguments using type guard
-          const args = { query, count, safeSearch };
+          const args = { query, count, safeSearch, freshness };
           if (!isWebSearchArgs(args)) {
             throw new Error('Invalid search arguments provided');
           }
@@ -57,7 +63,8 @@ class McpServerApp {
           const searchResults = await performWebSearch(
             args.query,
             args.count,
-            args.safeSearch
+            args.safeSearch,
+            args.freshness
           );
 
           return {
